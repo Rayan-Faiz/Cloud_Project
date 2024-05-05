@@ -1,0 +1,34 @@
+# MyNetwork Apache configuration file
+
+# Global Server Settings
+ServerAdmin webmaster@example.com
+ServerName mynetwork.example.com
+DocumentRoot /var/www/html
+
+# Disable Directory Listing
+<Directory /var/www/html>
+    Options -Indexes
+</Directory>
+
+# Virtual Host Configuration
+<VirtualHost *:80>
+    ServerName www.mynetwork.example.com
+    ServerAlias mynetwork.example.com
+    DocumentRoot /var/www/html/mynetwork
+
+    <Directory /var/www/html/mynetwork>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Error Log
+    ErrorLog ${APACHE_LOG_DIR}/mynetwork-error.log
+    CustomLog ${APACHE_LOG_DIR}/mynetwork-access.log combined
+</VirtualHost>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
