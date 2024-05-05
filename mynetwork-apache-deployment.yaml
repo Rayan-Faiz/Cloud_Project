@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynetwork-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mynetwork-apache
+  template:
+    metadata:
+      labels:
+        app: mynetwork-apache
+    spec:
+      containers:
+      - name: mynetwork-apache
+        image: mynetwork/apache:latest
+        ports:
+        - containerPort: 80
