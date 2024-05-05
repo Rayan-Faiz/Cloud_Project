@@ -1,0 +1,47 @@
+---
+- name: Deploy MyNetwork Services
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - mynetwork-apache
+        - mynetwork-bind
+        - mynetwork-dhcp
+
+    - name: Configure MyNetwork Apache
+      template:
+        src: mynetwork-apache.conf.j2
+        dest: /etc/mynetwork/apache.conf
+      notify: restart apache
+
+    - name: Configure MyNetwork BIND (DNS)
+      template:
+        src: mynetwork-bind.conf.j2
+        dest: /etc/mynetwork/bind/named.conf
+      notify: restart bind
+
+    - name: Configure MyNetwork DHCP
+      template:
+        src: mynetwork-dhcpd.conf.j2
+        dest: /etc/mynetwork/dhcp/dhcpd.conf
+      notify: restart dhcp
+
+  handlers:
+    - name: restart apache
+      service:
+        name: mynetwork-apache
+        state: restarted
+
+    - name: restart bind
+      service:
+        name: mynetwork-bind
+        state: restarted
+
+    - name: restart dhcp
+      service:
+        name: mynetwork-dhcp
+        state: restarted
