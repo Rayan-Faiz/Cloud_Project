@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynetwork-dhcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mynetwork-dhcp
+  template:
+    metadata:
+      labels:
+        app: mynetwork-dhcp
+    spec:
+      containers:
+      - name: mynetwork-dhcp
+        image: mynetwork/dhcp:latest
+        ports:
+        - containerPort: 67
