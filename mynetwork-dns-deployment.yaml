@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynetwork-dns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mynetwork-dns
+  template:
+    metadata:
+      labels:
+        app: mynetwork-dns
+    spec:
+      containers:
+      - name: mynetwork-dns
+        image: mynetwork/bind:latest
+        ports:
+        - containerPort: 53
