@@ -1,0 +1,34 @@
+// MyNetwork BIND (DNS) configuration file
+
+options {
+    directory "/var/cache/bind";
+
+    // Forwarding DNS Queries
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+
+    // Listen on Localhost Only
+    listen-on port 53 { 127.0.0.1; };
+    allow-query { localhost; };
+    allow-recursion { localhost; };
+};
+
+// Zone Configuration
+zone "mynetwork.example.com" {
+    type master;
+    file "/etc/bind/zones/mynetwork.zone";
+};
+
+// Logging Configuration
+logging {
+    channel default_log {
+        file "/var/log/bind/bind.log" versions 3 size 5m;
+        severity info;
+        print-time yes;
+        print-severity yes;
+        print-category yes;
+    };
+    category default { default_log; };
+};
