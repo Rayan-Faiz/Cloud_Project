@@ -1,47 +1,41 @@
 ---
-- name: Deploy MyNetwork Services
-  hosts: servers
-  become: yes
+- name: Deploy MyNetwork Services to Kubernetes Cluster
+  hosts: localhost
+  connection: local
   tasks:
-    - name: Install required packages
-      package:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - mynetwork-apache
-        - mynetwork-bind
-        - mynetwork-dhcp
-
-    - name: Configure MyNetwork Apache
-      template:
-        src: mynetwork-apache.conf.j2
-        dest: /etc/mynetwork/apache.conf
-      notify: restart apache
-
-    - name: Configure MyNetwork BIND (DNS)
-      template:
-        src: mynetwork-bind.conf.j2
-        dest: /etc/mynetwork/bind/named.conf
-      notify: restart bind
-
-    - name: Configure MyNetwork DHCP
-      template:
-        src: mynetwork-dhcpd.conf.j2
-        dest: /etc/mynetwork/dhcp/dhcpd.conf
-      notify: restart dhcp
+    - name: Apply Apache Deployment
+      kubernetes.core:
+        definition: "{{ lookup('file', 'apache-deployment.yaml') }}"
+    
+    - name: Apply Apache Service
+      kubernetes.core:
+        definition: "{{ lookup('file', 'apache-service.yaml') }}"
+    
+    - name: Apply BIND Deployment
+      kubernetes.core:
+        definition: "{{ lookup('file', 'bind-deployment.yaml') }}"
+    
+    - name: Apply BIND Service
+      kubernetes.core:
+        definition: "{{ lookup('file', 'bind-service.yaml') }}"
+    
+    - name: Apply DHCP Deployment
+      kubernetes.core:
+        definition: "{{ lookup('file', 'dhcp-deployment.yaml') }}"
+    
+    - name: Apply DHCP Service
+      kubernetes.core:
+        definition: "{{ lookup('file', 'dhcp-service.yaml') }}"
 
   handlers:
     - name: restart apache
-      service:
-        name: mynetwork-apache
-        state: restarted
-
+      kubernetes.core:
+        definition: "{{ lookup('file', 'apache-restart.yaml') }}"
+    
     - name: restart bind
-      service:
-        name: mynetwork-bind
-        state: restarted
-
+      kubernetes.core:
+        definition: "{{ lookup('file', 'bind-restart.yaml') }}"
+    
     - name: restart dhcp
-      service:
-        name: mynetwork-dhcp
-        state: restarted
+      kubernetes.core:
+        definition: "{{ lookup('file', 'dhcp-restart.yaml') }}"
