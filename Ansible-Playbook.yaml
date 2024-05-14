@@ -1,41 +1,42 @@
 ---
-- name: Deploy MyNetwork Services to Kubernetes Cluster
+- name: Deploy Services on Kubernetes
   hosts: localhost
-  connection: local
+  gather_facts: no
   tasks:
-    - name: Apply Apache Deployment
-      kubernetes.core:
-        definition: "{{ lookup('file', 'apache-deployment.yaml') }}"
-    
-    - name: Apply Apache Service
-      kubernetes.core:
-        definition: "{{ lookup('file', 'apache-service.yaml') }}"
-    
-    - name: Apply BIND Deployment
-      kubernetes.core:
-        definition: "{{ lookup('file', 'bind-deployment.yaml') }}"
-    
-    - name: Apply BIND Service
-      kubernetes.core:
-        definition: "{{ lookup('file', 'bind-service.yaml') }}"
-    
     - name: Apply DHCP Deployment
-      kubernetes.core:
-        definition: "{{ lookup('file', 'dhcp-deployment.yaml') }}"
-    
-    - name: Apply DHCP Service
-      kubernetes.core:
-        definition: "{{ lookup('file', 'dhcp-service.yaml') }}"
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'dhcp-deployment.yaml') }}"
+      register: dhcp_result
 
-  handlers:
-    - name: restart apache
-      kubernetes.core:
-        definition: "{{ lookup('file', 'apache-restart.yaml') }}"
-    
-    - name: restart bind
-      kubernetes.core:
-        definition: "{{ lookup('file', 'bind-restart.yaml') }}"
-    
-    - name: restart dhcp
-      kubernetes.core:
-        definition: "{{ lookup('file', 'dhcp-restart.yaml') }}"
+    - name: Apply Apache Deployment
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'apache-deployment.yaml') }}"
+      register: apache_result
+
+    - name: Apply DNS Deployment
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'dns-deployment.yaml') }}"
+      register: dns_result
+
+    - name: Wait for services to be ready
+      k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: default
+        label_selectors:
+          - app in (mynetwork-dhcp, mynetwork-apache, mynetwork-dns)
+      register: deployment_info
+      until: deployment_info.resources | selectattr('status.readyReplicas', 'defined') | map(attribute='status.readyReplicas') | list == [1, 1, 1]
+      retries: 10
+      delay: 10
+
+    - name: Print deployment results
+      debug:
+        msg: "{{ item.0.name }} deployment status: {{ item.1 | json_query('resources[0].status') }}"
+      loop:
+        - { name: "DHCP", status: "{{ dhcp_result }}" }
+        - { name: "Apache", status: "{{ apache_result }}" }
+        - { name: "DNS", status: "{{ dns_result }}" }
