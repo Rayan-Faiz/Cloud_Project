@@ -50,7 +50,47 @@ Once the infrastructure is provisioned and configured, Kubernetes takes over the
 ### Continuous Integration/Continuous Deployment (CI/CD):
 Ansible can also be used for CI/CD pipelines, where it automates the deployment of applications to Kubernetes clusters, ensuring consistency and repeatability in the deployment process.
 
-## V. Specifics Configurations:
+## V. Getting Started:
+
+we need docker and minikube
+
+### 1. Docker:
+
+Update the apt package index and install packages to allow apt to use a repository over HTTPS:
+
+    sudo apt-get update
+    sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+
+Add Docker’s official GPG key:
+
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+Set up the stable Docker repository:
+
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+Update the apt package index again and install Docker CE:
+
+    sudo apt-get update
+    sudo apt-get install docker-ce
+
+### 2. Minikube:
+
+Install the binary:
+
+    curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+
+Start Minikube with Docker:
+
+    minikube start --driver=docker
+
+### 3. Deploy the services:
+
+You need to clone the repository and then start the Ansible playbook with:
+
+    ansible-playbook Ansible-Playbook.yaml
+
+## VI. Specifics Configurations:
 
 ### 1. Apache Configuration:
 Apache is a web server software that hosts websites and serves web pages to users. In the configuration file, we define settings like the server's name (`ServerName`), email address of the server administrator (`ServerAdmin`), and the root directory for website files (`DocumentRoot`). We also configure a virtual host (`<VirtualHost>`) to host our website. Here, we specify the server name, document root, and access permissions for the directory. Additionally, we set security headers to enhance the security of the website.
